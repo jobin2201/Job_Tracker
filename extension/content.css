@@ -1,0 +1,22 @@
+.job-tracker-toast {
+  position: fixed;
+  z-index: 2147483647;
+  right: 24px;
+  bottom: 24px;
+  width: 320px;
+  padding: 16px 18px;
+  border: 1px solid #b8dccf;
+  border-radius: 12px;
+  color: #193d31;
+  background: #f1fbf7;
+  box-shadow: 0 14px 40px rgba(0,0,0,.18);
+  font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: .2s ease;
+}
+.job-tracker-toast.visible { opacity: 1; transform: translateY(0); }
+.job-tracker-toast.error { border-color: #f1b9b4; color: #722820; background: #fff4f2; }
+.job-tracker-toast strong, .job-tracker-toast span { display: block; }
+.job-tracker-toast strong { margin-bottom: 3px; }
+

@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Job Tracker for LinkedIn",
+  "version": "0.11.10",
+  "description": "Tracks confirmed LinkedIn Easy Apply and external Apply application flows.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/jobs/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Job Tracker"
+  }
+}

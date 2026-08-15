@@ -1,0 +1,45 @@
+JobTRACKER/
+│── .gitignore
+│── README.md
+│── project_stuructre.txt
+│
+├── backend/
+│   ├── .env.example
+│   ├── alembic.ini
+│   ├── requirements.txt
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── database.py
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   └── schemas.py
+│   └── migrations/
+│       ├── env.py
+│       ├── script.py.mako
+│       └── versions/
+│           ├── 20260813_0001_initial_postgresql.py
+│           ├── 20260813_0002_application_workspace.py
+│           └── 20260813_0003_application_contacts.py
+│
+├── extension/
+│   ├── README.md
+│   ├── manifest.json
+│   ├── background.js
+│   ├── content.js
+│   ├── content.css
+│   ├── popup.html
+│   ├── popup.js
+│   └── popup.css
+│
+└── frontend/
+    ├── index.html
+    ├── package.json
+    ├── package-lock.json
+    ├── tsconfig.json
+    ├── tsconfig.app.json
+    ├── vite.config.ts
+    └── src/
+        ├── vite-env.d.ts
+        ├── main.tsx
+        ├── App.tsx
+        └── styles.css

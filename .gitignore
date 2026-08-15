@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local data and secrets
+*.db
+*.db-*
+*.sqlite3
+.env
+**/.env
+**/.env.*
+!**/.env.example
+backend/.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+credentials.json
+secrets.json
+*.log
+
+# Frontend
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+coverage/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Extension packages/build output
+extension/node_modules/
+extension/dist/
+extension/*.crx
+extension/*.zip
+extension/*.pem
+
+README(1).md
