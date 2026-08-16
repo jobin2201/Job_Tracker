@@ -32,6 +32,7 @@ import {
   PanelLeftClose,
   SlidersHorizontal,
 } from "lucide-react";
+import { AccountCard, AuthGate, getCurrentUser, signOut, type AuthUser } from "./authentication";
 
 const STATUSES = [
   "PENDING_CONFIRMATION",
@@ -196,6 +197,7 @@ const formatDateTime = (value: string) =>
 async function api<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...options,
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...options?.headers },
   });
   if (!response.ok) {
@@ -441,7 +443,12 @@ function ApplicationWorkspace({
               </select>
               {application.job_url && (
                 <a href={application.job_url} target="_blank" rel="noreferrer">
-                  LinkedIn listing <ExternalLink size={14} />
+                  {application.source === "Indeed"
+                    ? "Indeed listing"
+                    : application.source === "LinkedIn"
+                      ? "LinkedIn listing"
+                      : "Job listing"}{" "}
+                  <ExternalLink size={14} />
                 </a>
               )}
             </div>
@@ -958,6 +965,7 @@ function ApplicationWorkspace({
 }
 
 export default function App() {
+  const [authUser, setAuthUser] = useState<AuthUser | null | undefined>(undefined);
   const [applications, setApplications] = useState<Application[]>([]);
   const [dashboard, setDashboard] = useState<Dashboard>({
     total: 0,
@@ -991,6 +999,11 @@ export default function App() {
       (localStorage.getItem("trajectory-theme") as Theme) ||
       (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
   );
+  useEffect(() => {
+    getCurrentUser()
+      .then(setAuthUser)
+      .catch(() => setAuthUser(null));
+  }, []);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
@@ -1066,6 +1079,7 @@ export default function App() {
     }
   }, [theme]);
   const load = useCallback(async () => {
+    if (!authUser) return;
     try {
       const [apps, stats] = await Promise.all([
         api<Application[]>("/api/applications"),
@@ -1079,9 +1093,9 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authUser]);
   useEffect(() => {
-    load();
+    if (authUser) load();
   }, [load]);
   useEffect(() => {
     const refresh = () => load();
@@ -1096,7 +1110,7 @@ export default function App() {
       window.removeEventListener("focus", refresh);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
-  }, [load]);
+  }, [load, authUser]);
   useEffect(() => {
     if (!("Notification" in window) || Notification.permission !== "granted" || !attentionCount) return;
     const key = `trajectory-notified-${today()}-${attentionCount}`;
@@ -1192,6 +1206,7 @@ export default function App() {
     roleFilter,
     sortBy,
   ]);
+  if (!authUser) return <AuthGate user={authUser} />;
   if (selected)
     return (
       <ApplicationWorkspace
@@ -1245,6 +1260,7 @@ export default function App() {
           </button>
         </nav>
         <div className="sidebar-spacer" />
+        <AccountCard user={authUser} onSignOut={async () => { await signOut(); setAuthUser(null); }} />
         <div className="tip-card">
           <Sparkles size={18} />
           <strong>Your search, organized</strong>

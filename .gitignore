@@ -5,6 +5,11 @@ __pycache__/
 .venv/
 
 # Local data and secrets
+db_backups/
+backups/
+*.dump
+*.backup
+*.sql
 *.db
 *.db-*
 *.sqlite3
@@ -21,6 +26,13 @@ backend/.env
 *.cer
 credentials.json
 secrets.json
+client_secret*.json
+service-account*.json
+service_account*.json
+.pgpass
+pgpass.conf
+.supabase/
+supabase/.temp/
 *.log
 
 # Frontend

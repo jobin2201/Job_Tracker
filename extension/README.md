@@ -1,4 +1,4 @@
-# LinkedIn extension
+# Job Tracker extension
 
 This unpacked Chrome extension supports **LinkedIn Easy Apply**. It captures the
 job temporarily when Easy Apply opens and records it after you click the final
@@ -19,3 +19,8 @@ LinkedIn changes its page markup regularly. The detector uses multiple selectors
 and confirmation phrases and always deduplicates imports by LinkedIn job ID in
 PostgreSQL. External Apply flows that leave LinkedIn are intentionally not marked
 as submitted because LinkedIn cannot confirm their completion.
+
+Indeed support is implemented independently in `indeed/content.js`. Indeed-hosted
+applications are recorded after Indeed shows a submission confirmation. Jobs that
+open an external employer site are added to Needs Attention first and are recorded
+as applied only after the user confirms completion in the Indeed-page prompt.

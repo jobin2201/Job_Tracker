@@ -1,0 +1,41 @@
+#job-tracker-indeed-toast,
+#job-tracker-indeed-confirm {
+  position: fixed;
+  z-index: 2147483647;
+  right: 22px;
+  width: min(360px, calc(100vw - 44px));
+  border: 1px solid #c7d7ff;
+  border-radius: 14px;
+  color: #17233f;
+  background: #fff;
+  box-shadow: 0 18px 55px rgba(21, 42, 85, 0.2);
+  font: 14px/1.45 Arial, sans-serif;
+}
+#job-tracker-indeed-toast {
+  top: 22px;
+  padding: 14px 16px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+#job-tracker-indeed-toast.visible { opacity: 1; transform: translateY(0); }
+#job-tracker-indeed-toast.error { border-color: #efb6b6; color: #762626; background: #fff7f7; }
+#job-tracker-indeed-toast strong,
+#job-tracker-indeed-toast span,
+#job-tracker-indeed-confirm strong,
+#job-tracker-indeed-confirm span { display: block; }
+#job-tracker-indeed-toast strong { margin-bottom: 3px; }
+#job-tracker-indeed-confirm { bottom: 22px; padding: 18px; }
+#job-tracker-indeed-confirm strong { font-size: 16px; }
+#job-tracker-indeed-confirm span { margin-top: 5px; color: #5c6780; }
+#job-tracker-indeed-confirm div { display: flex; gap: 8px; margin-top: 15px; }
+#job-tracker-indeed-confirm button {
+  border: 1px solid #c9d2e5;
+  border-radius: 9px;
+  padding: 9px 12px;
+  color: #24314f;
+  background: #f5f7fb;
+  cursor: pointer;
+  font-weight: 700;
+}
+#job-tracker-indeed-confirm button:first-child { border-color: #2557a7; color: #fff; background: #2557a7; }

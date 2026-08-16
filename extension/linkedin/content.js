@@ -1,5 +1,5 @@
 (() => {
-  const SCRIPT_VERSION = "0.11.10";
+  const SCRIPT_VERSION = "0.11.11";
   const INSTANCE_KEY = "__JOB_TRACKER_LINKEDIN_DETECTOR__";
   if (window[INSTANCE_KEY]) return;
   window[INSTANCE_KEY] = { version: SCRIPT_VERSION };

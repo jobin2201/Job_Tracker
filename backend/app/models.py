@@ -11,10 +11,11 @@ class Application(Base):
     __tablename__ = "applications"
     __table_args__ = (
         Index("ix_applications_status", "status"),
-        Index("uq_linkedin_external_job", "source", "external_job_id", unique=True),
+        Index("uq_user_source_external_job", "user_id", "source", "external_job_id", unique=True),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     company: Mapped[str] = mapped_column(String(120))
     role: Mapped[str] = mapped_column(String(160))
     location: Mapped[str] = mapped_column(String(160), default="")
@@ -47,6 +48,20 @@ class Application(Base):
     contacts: Mapped[list["ApplicationContact"]] = relationship(
         back_populates="application", cascade="all, delete-orphan"
     )
+    user: Mapped["User"] = relationship(back_populates="applications")
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    google_subject: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(320), default="")
+    name: Mapped[str] = mapped_column(String(160), default="")
+    picture_url: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    applications: Mapped[list["Application"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class ApplicationEvent(Base):

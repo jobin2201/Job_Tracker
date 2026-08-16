@@ -1,45 +1,76 @@
 JobTRACKER/
-│── .gitignore
-│── README.md
-│── project_stuructre.txt
-│
-├── backend/
-│   ├── .env.example
-│   ├── alembic.ini
-│   ├── requirements.txt
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── database.py
-│   │   ├── main.py
-│   │   ├── models.py
-│   │   └── schemas.py
-│   └── migrations/
-│       ├── env.py
-│       ├── script.py.mako
-│       └── versions/
-│           ├── 20260813_0001_initial_postgresql.py
-│           ├── 20260813_0002_application_workspace.py
-│           └── 20260813_0003_application_contacts.py
-│
-├── extension/
-│   ├── README.md
-│   ├── manifest.json
-│   ├── background.js
-│   ├── content.js
-│   ├── content.css
-│   ├── popup.html
-│   ├── popup.js
-│   └── popup.css
-│
-└── frontend/
-    ├── index.html
-    ├── package.json
-    ├── package-lock.json
-    ├── tsconfig.json
-    ├── tsconfig.app.json
-    ├── vite.config.ts
-    └── src/
-        ├── vite-env.d.ts
-        ├── main.tsx
-        ├── App.tsx
-        └── styles.css
+|-- .gitignore
+|-- LICENSE
+|-- README.md
+|-- project_stuructre.txt
+|
+|-- db_backups/                         # Local only; ignored by Git
+|   `-- job_tracker_2026-08-16.dump
+|
+|-- backend/
+|   |-- .env                            # Local secrets; ignored by Git
+|   |-- .env.example                    # Safe placeholders
+|   |-- alembic.ini
+|   |-- requirements.txt
+|   |-- app/
+|   |   |-- __init__.py
+|   |   |-- database.py
+|   |   |-- main.py
+|   |   |-- models.py
+|   |   |-- schemas.py
+|   |   `-- authentication/
+|   |       |-- __init__.py
+|   |       |-- dependencies.py
+|   |       |-- oauth.py
+|   |       |-- router.py
+|   |       `-- security.py
+|   `-- migrations/
+|       |-- env.py
+|       |-- script.py.mako
+|       `-- versions/
+|           |-- 20260813_0001_initial_postgresql.py
+|           |-- 20260813_0002_application_workspace.py
+|           |-- 20260813_0003_application_contacts.py
+|           `-- 20260816_0004_users_and_ownership.py
+|
+|-- extension/
+|   |-- README.md
+|   |-- manifest.json
+|   |-- background.js
+|   |-- authentication/
+|   |   `-- auth.js
+|   |-- linkedin/
+|   |   |-- content.js
+|   |   `-- content.css
+|   |-- indeed/
+|   |   |-- content.js
+|   |   `-- content.css
+|   `-- popup/
+|       |-- popup.html
+|       |-- popup.js
+|       `-- popup.css
+|
+|-- frontend/
+|   |-- index.html
+|   |-- package.json
+|   |-- package-lock.json
+|   |-- tsconfig.json
+|   |-- tsconfig.app.json
+|   |-- vite.config.ts
+|   `-- src/
+|       |-- main.tsx
+|       |-- App.tsx
+|       |-- styles.css
+|       |-- vite-env.d.ts
+|       `-- authentication/
+|           |-- AuthGate.tsx
+|           |-- auth.ts
+|           |-- authentication.css
+|           `-- index.ts
+|
+`-- screenshots/
+    |-- application-details.png
+    |-- dashboard.png
+    |-- easy-apply.png
+    |-- extension.png
+    `-- linkedin-job.png

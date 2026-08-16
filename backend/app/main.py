@@ -11,8 +11,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 from starlette.middleware.sessions import SessionMiddleware
 
+from .authentication import authentication_router, current_user
 from .database import get_db
-from .models import Application, ApplicationContact, ApplicationEvent, FollowUp, LinkedInAccount
+from .models import Application, ApplicationContact, ApplicationEvent, FollowUp, LinkedInAccount, User
 from .schemas import (
     ApplicationCreate,
     ApplicationUpdate,
@@ -54,6 +55,7 @@ if os.getenv("LINKEDIN_CLIENT_ID") and os.getenv("LINKEDIN_CLIENT_SECRET"):
         server_metadata_url="https://www.linkedin.com/oauth/.well-known/openid-configuration",
         client_kwargs={"scope": "openid profile email"},
     )
+app.include_router(authentication_router)
 
 
 def serialize_event(event: ApplicationEvent) -> dict:
@@ -124,8 +126,8 @@ def serialize_contact(item: ApplicationContact) -> dict:
             "linkedin_url": item.linkedin_url, "notes": item.notes, "created_at": item.created_at}
 
 
-def application_or_404(db: Session, application_id: int, with_events: bool = False) -> Application:
-    statement = select(Application).where(Application.id == application_id)
+def application_or_404(db: Session, application_id: int, user_id: int, with_events: bool = False) -> Application:
+    statement = select(Application).where(Application.id == application_id, Application.user_id == user_id)
     if with_events:
         statement = statement.options(selectinload(Application.events), selectinload(Application.follow_ups), selectinload(Application.contacts))
     application = db.scalar(statement)
@@ -146,8 +148,9 @@ def list_applications(
     application_status: Optional[str] = Query(default=None, alias="status"),
     follow_ups_only: bool = False,
     db: Session = Depends(get_db),
+    user: User = Depends(current_user),
 ):
-    statement = select(Application)
+    statement = select(Application).where(Application.user_id == user.id)
     if search.strip():
         term = f"%{search.strip()}%"
         statement = statement.where(
@@ -162,44 +165,44 @@ def list_applications(
 
 
 @app.get("/api/applications/{application_id}")
-def get_application(application_id: int, db: Session = Depends(get_db)):
-    return serialize_application(application_or_404(db, application_id, True), True)
+def get_application(application_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    return serialize_application(application_or_404(db, application_id, user.id, True), True)
 
 
 @app.post("/api/applications", status_code=status.HTTP_201_CREATED)
-def create_application(payload: ApplicationCreate, db: Session = Depends(get_db)):
+def create_application(payload: ApplicationCreate, db: Session = Depends(get_db), user: User = Depends(current_user)):
     data = payload.model_dump()
     data["job_url"] = str(payload.job_url) if payload.job_url else ""
     if data["status"] == "APPLIED" and not data["applied_at"]:
         data["applied_at"] = date.today()
-    application = Application(**data)
+    application = Application(user_id=user.id, **data)
     application.events.append(
         ApplicationEvent(event_type="CREATED", new_status=data["status"], description="Application added")
     )
     db.add(application)
     db.commit()
     db.refresh(application)
-    return serialize_application(application_or_404(db, application.id, True), True)
+    return serialize_application(application_or_404(db, application.id, user.id, True), True)
 
 
 @app.patch("/api/applications/{application_id}")
-def update_application(application_id: int, payload: ApplicationUpdate, db: Session = Depends(get_db)):
-    application = application_or_404(db, application_id)
+def update_application(application_id: int, payload: ApplicationUpdate, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application = application_or_404(db, application_id, user.id)
     changes = payload.model_dump(exclude_unset=True)
     if "job_url" in changes:
         changes["job_url"] = str(payload.job_url) if payload.job_url else ""
     for field, value in changes.items():
         setattr(application, field, value)
     db.commit()
-    return serialize_application(application_or_404(db, application_id, True), True)
+    return serialize_application(application_or_404(db, application_id, user.id, True), True)
 
 
 @app.post("/api/applications/{application_id}/status")
-def change_status(application_id: int, payload: StatusUpdate, db: Session = Depends(get_db)):
-    application = application_or_404(db, application_id)
+def change_status(application_id: int, payload: StatusUpdate, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application = application_or_404(db, application_id, user.id)
     old_status = application.status
     if old_status == payload.status:
-        return serialize_application(application_or_404(db, application_id, True), True)
+        return serialize_application(application_or_404(db, application_id, user.id, True), True)
     application.status = payload.status
     if payload.status == "APPLIED" and not application.applied_at:
         application.applied_at = date.today()
@@ -212,12 +215,12 @@ def change_status(application_id: int, payload: StatusUpdate, db: Session = Depe
         )
     )
     db.commit()
-    return serialize_application(application_or_404(db, application_id, True), True)
+    return serialize_application(application_or_404(db, application_id, user.id, True), True)
 
 
 @app.post("/api/applications/{application_id}/events", status_code=status.HTTP_201_CREATED)
-def add_event(application_id: int, payload: EventCreate, db: Session = Depends(get_db)):
-    application = application_or_404(db, application_id)
+def add_event(application_id: int, payload: EventCreate, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application = application_or_404(db, application_id, user.id)
     application.events.append(
         ApplicationEvent(
             event_type=payload.event_type.strip().upper().replace(" ", "_"),
@@ -227,12 +230,12 @@ def add_event(application_id: int, payload: EventCreate, db: Session = Depends(g
         )
     )
     db.commit()
-    return serialize_application(application_or_404(db, application_id, True), True)
+    return serialize_application(application_or_404(db, application_id, user.id, True), True)
 
 
 @app.post("/api/applications/{application_id}/follow-ups", status_code=status.HTTP_201_CREATED)
-def create_follow_up(application_id: int, payload: FollowUpCreate, db: Session = Depends(get_db)):
-    application = application_or_404(db, application_id)
+def create_follow_up(application_id: int, payload: FollowUpCreate, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application = application_or_404(db, application_id, user.id)
     follow_up = FollowUp(application=application, **payload.model_dump())
     application.follow_up_at = payload.scheduled_for
     application.events.append(ApplicationEvent(
@@ -241,12 +244,12 @@ def create_follow_up(application_id: int, payload: FollowUpCreate, db: Session =
     ))
     db.add(follow_up)
     db.commit()
-    return serialize_application(application_or_404(db, application_id, True), True)
+    return serialize_application(application_or_404(db, application_id, user.id, True), True)
 
 
 @app.post("/api/applications/{application_id}/follow-ups/{follow_up_id}/complete")
-def complete_follow_up(application_id: int, follow_up_id: int, payload: FollowUpComplete, db: Session = Depends(get_db)):
-    application = application_or_404(db, application_id)
+def complete_follow_up(application_id: int, follow_up_id: int, payload: FollowUpComplete, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application = application_or_404(db, application_id, user.id)
     follow_up = db.scalar(select(FollowUp).where(FollowUp.id == follow_up_id, FollowUp.application_id == application_id))
     if not follow_up:
         raise HTTPException(status_code=404, detail="Follow-up not found")
@@ -271,12 +274,12 @@ def complete_follow_up(application_id: int, follow_up_id: int, payload: FollowUp
         ).order_by(FollowUp.scheduled_for))
         application.follow_up_at = next_item.scheduled_for if next_item else None
     db.commit()
-    return serialize_application(application_or_404(db, application_id, True), True)
+    return serialize_application(application_or_404(db, application_id, user.id, True), True)
 
 
 @app.delete("/api/applications/{application_id}/follow-ups/{follow_up_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_follow_up(application_id: int, follow_up_id: int, db: Session = Depends(get_db)):
-    application_or_404(db, application_id)
+def delete_follow_up(application_id: int, follow_up_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application_or_404(db, application_id, user.id)
     item = db.scalar(select(FollowUp).where(FollowUp.id == follow_up_id, FollowUp.application_id == application_id))
     if not item:
         raise HTTPException(status_code=404, detail="Follow-up not found")
@@ -286,8 +289,8 @@ def delete_follow_up(application_id: int, follow_up_id: int, db: Session = Depen
 
 
 @app.post("/api/applications/{application_id}/contacts", status_code=status.HTTP_201_CREATED)
-def create_contact(application_id: int, payload: ContactCreate, db: Session = Depends(get_db)):
-    application = application_or_404(db, application_id)
+def create_contact(application_id: int, payload: ContactCreate, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application = application_or_404(db, application_id, user.id)
     data = payload.model_dump()
     relationship_level = data.pop("relationship")
     contact = ApplicationContact(application=application, relationship_level=relationship_level, **data)
@@ -297,12 +300,12 @@ def create_contact(application_id: int, payload: ContactCreate, db: Session = De
         description=f"Contact added: {payload.name}",
     ))
     db.commit()
-    return serialize_application(application_or_404(db, application_id, True), True)
+    return serialize_application(application_or_404(db, application_id, user.id, True), True)
 
 
 @app.delete("/api/applications/{application_id}/contacts/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_contact(application_id: int, contact_id: int, db: Session = Depends(get_db)):
-    application_or_404(db, application_id)
+def delete_contact(application_id: int, contact_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application_or_404(db, application_id, user.id)
     contact = db.scalar(select(ApplicationContact).where(ApplicationContact.id == contact_id, ApplicationContact.application_id == application_id))
     if not contact:
         raise HTTPException(status_code=404, detail="Contact not found")
@@ -312,30 +315,36 @@ def delete_contact(application_id: int, contact_id: int, db: Session = Depends(g
 
 
 @app.delete("/api/applications/{application_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_application(application_id: int, db: Session = Depends(get_db)):
-    application = application_or_404(db, application_id)
+def delete_application(application_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    application = application_or_404(db, application_id, user.id)
     db.delete(application)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.get("/api/dashboard")
-def dashboard(db: Session = Depends(get_db)):
-    total = db.scalar(select(func.count(Application.id))) or 0
-    status_rows = db.execute(select(Application.status, func.count(Application.id)).group_by(Application.status)).all()
+def dashboard(db: Session = Depends(get_db), user: User = Depends(current_user)):
+    total = db.scalar(select(func.count(Application.id)).where(Application.user_id == user.id)) or 0
+    status_rows = db.execute(
+        select(Application.status, func.count(Application.id))
+        .where(Application.user_id == user.id)
+        .group_by(Application.status)
+    ).all()
     follow_ups = db.scalar(
         select(func.count(Application.id)).where(
             Application.follow_up_at.is_not(None),
             Application.follow_up_at <= date.today(),
             Application.status.not_in(["REJECTED", "WITHDRAWN", "CLOSED"]),
+            Application.user_id == user.id,
         )
     ) or 0
     interviews = db.scalar(
         select(func.count(Application.id)).where(
             Application.status.in_(["INTERVIEW", "TECHNICAL_INTERVIEW", "FINAL_INTERVIEW"])
+            , Application.user_id == user.id
         )
     ) or 0
-    offers = db.scalar(select(func.count(Application.id)).where(Application.status == "OFFER")) or 0
+    offers = db.scalar(select(func.count(Application.id)).where(Application.status == "OFFER", Application.user_id == user.id)) or 0
     return {
         "total": total,
         "follow_ups_due": follow_ups,
@@ -346,10 +355,10 @@ def dashboard(db: Session = Depends(get_db)):
 
 
 @app.post("/api/linkedin/import")
-def import_linkedin_application(payload: LinkedInImport, db: Session = Depends(get_db)):
+def import_linkedin_application(payload: LinkedInImport, db: Session = Depends(get_db), user: User = Depends(current_user)):
     existing = db.scalar(
         select(Application)
-        .where(Application.source == "LinkedIn", Application.external_job_id == payload.external_job_id)
+        .where(Application.user_id == user.id, Application.source == "LinkedIn", Application.external_job_id == payload.external_job_id)
         .options(selectinload(Application.events), selectinload(Application.contacts))
     )
     target_status = "PENDING_CONFIRMATION" if payload.pending_confirmation else ("APPLIED" if payload.applied else "SAVED")
@@ -428,6 +437,7 @@ def import_linkedin_application(payload: LinkedInImport, db: Session = Depends(g
         return {"created": False, "application": serialize_application(existing, True)}
 
     application = Application(
+        user_id=user.id,
         company=payload.company.strip(),
         role=payload.role.strip(),
         location=payload.location.strip(),
@@ -466,13 +476,121 @@ def import_linkedin_application(payload: LinkedInImport, db: Session = Depends(g
         db.rollback()
         existing = db.scalar(
             select(Application)
-            .where(Application.source == "LinkedIn", Application.external_job_id == payload.external_job_id)
+            .where(Application.user_id == user.id, Application.source == "LinkedIn", Application.external_job_id == payload.external_job_id)
             .options(selectinload(Application.events), selectinload(Application.contacts))
         )
         if existing:
             return {"created": False, "application": serialize_application(existing, True)}
         raise
-    return {"created": True, "application": serialize_application(application_or_404(db, application.id, True), True)}
+    return {"created": True, "application": serialize_application(application_or_404(db, application.id, user.id, True), True)}
+
+
+@app.post("/api/indeed/import")
+def import_indeed_application(payload: LinkedInImport, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    """Import Indeed jobs independently without changing the LinkedIn pipeline."""
+    source = "Indeed"
+    existing = db.scalar(
+        select(Application)
+        .where(Application.user_id == user.id, Application.source == source, Application.external_job_id == payload.external_job_id)
+        .options(selectinload(Application.events), selectinload(Application.contacts))
+    )
+    target_status = "PENDING_CONFIRMATION" if payload.pending_confirmation else ("APPLIED" if payload.applied else "SAVED")
+    placeholder_role = lambda value: value.strip().lower() in {"search", f"indeed job {payload.external_job_id}".lower()}
+    concatenated_location = lambda value: value.replace(" ", "").lower().startswith(payload.company.replace(" ", "").lower())
+
+    if existing:
+        old_status = existing.status
+        incoming = {
+            "company": payload.company.strip(), "role": payload.role.strip(),
+            "location": payload.location.strip(), "job_url": str(payload.job_url),
+            "description": payload.description.strip(), "posted_text": payload.posted_text.strip(),
+            "applicants_text": payload.applicants_text.strip(), "work_type": payload.work_type.strip(),
+            "employment_type": payload.employment_type.strip(),
+        }
+        for field, value in incoming.items():
+            if not value:
+                continue
+            if field == "role" and placeholder_role(value):
+                continue
+            if field == "location" and concatenated_location(value):
+                continue
+            if field == "description" and len(value) < len(existing.description or ""):
+                continue
+            setattr(existing, field, value)
+        if payload.pending_confirmation and existing.status not in ["APPLIED", "PENDING_CONFIRMATION"]:
+            existing.status = "PENDING_CONFIRMATION"
+            existing.follow_up_at = existing.follow_up_at or date.today() + timedelta(days=1)
+            existing.events.append(ApplicationEvent(
+                event_type="INDEED_APPLICATION_STARTED", old_status=old_status,
+                new_status="PENDING_CONFIRMATION",
+                description="External Indeed application started; confirmation is still needed",
+            ))
+        elif payload.applied and existing.status != "APPLIED":
+            existing.status = "APPLIED"
+            existing.applied_at = existing.applied_at or date.today()
+            existing.follow_up_at = date.today() + timedelta(days=7)
+            existing.events.append(ApplicationEvent(
+                event_type="INDEED_APPLY_DETECTED", old_status=old_status,
+                new_status="APPLIED",
+                description="Indeed application confirmed",
+            ))
+        known_contacts = {
+            (contact.linkedin_url.lower(), contact.email.lower(), contact.name.lower())
+            for contact in existing.contacts
+        }
+        for contact in payload.contacts:
+            key = (contact.linkedin_url.strip().lower(), contact.email.strip().lower(), contact.name.strip().lower())
+            if key in known_contacts:
+                continue
+            existing.contacts.append(ApplicationContact(
+                name=contact.name.strip(), title=contact.title.strip(),
+                relationship_level=contact.relationship.strip(),
+                linkedin_url=contact.linkedin_url.strip(), email=contact.email.strip(),
+                phone=contact.phone.strip(), notes=contact.notes.strip(),
+            ))
+            known_contacts.add(key)
+        db.commit()
+        return {"created": False, "application": serialize_application(existing, True)}
+
+    application = Application(
+        user_id=user.id,
+        company=payload.company.strip(), role=payload.role.strip(),
+        location=payload.location.strip(), source=source,
+        external_job_id=payload.external_job_id, job_url=str(payload.job_url),
+        description=payload.description.strip(), posted_text=payload.posted_text.strip(),
+        applicants_text=payload.applicants_text.strip(), work_type=payload.work_type.strip(),
+        employment_type=payload.employment_type.strip(), status=target_status,
+        applied_at=date.today() if payload.applied and not payload.pending_confirmation else None,
+        follow_up_at=(date.today() + timedelta(days=1)) if payload.pending_confirmation
+        else (date.today() + timedelta(days=7) if payload.applied else None),
+    )
+    application.events.append(ApplicationEvent(
+        event_type="INDEED_APPLICATION_STARTED" if payload.pending_confirmation else "INDEED_APPLY_DETECTED",
+        new_status=target_status,
+        description="External Indeed application started; confirmation is still needed"
+        if payload.pending_confirmation else "Application action captured from Indeed",
+    ))
+    for contact in payload.contacts:
+        application.contacts.append(ApplicationContact(
+            name=contact.name.strip(), title=contact.title.strip(),
+            relationship_level=contact.relationship.strip(),
+            linkedin_url=contact.linkedin_url.strip(), email=contact.email.strip(),
+            phone=contact.phone.strip(), notes=contact.notes.strip(),
+        ))
+    db.add(application)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        existing = db.scalar(
+            select(Application)
+            .where(Application.user_id == user.id, Application.source == source, Application.external_job_id == payload.external_job_id)
+            .options(selectinload(Application.events), selectinload(Application.contacts))
+        )
+        if existing:
+            return {"created": False, "application": serialize_application(existing, True)}
+        raise
+    return {"created": True, "application": serialize_application(application_or_404(db, application.id, user.id, True), True)}
 
 
 @app.get("/auth/linkedin/status")
