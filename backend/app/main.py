@@ -1,3 +1,4 @@
+import asyncio
 import os
 from datetime import date, datetime, timedelta, timezone
 from typing import Optional
@@ -12,6 +13,9 @@ from sqlalchemy.orm import Session, selectinload
 from starlette.middleware.sessions import SessionMiddleware
 
 from .authentication import authentication_router, current_user
+from .authentication.session_policy import ACCESS_SESSION_SECONDS
+from .integrations.google_sheets import google_sheets_router
+from .integrations.google_sheets.worker import sheets_sync_worker
 from .database import get_db
 from .models import Application, ApplicationContact, ApplicationEvent, FollowUp, LinkedInAccount, User
 from .schemas import (
@@ -32,6 +36,7 @@ app.add_middleware(
     secret_key=os.getenv("SESSION_SECRET", "local-development-only"),
     same_site="lax",
     https_only=False,
+    max_age=ACCESS_SESSION_SECONDS,
 )
 app.add_middleware(
     CORSMiddleware,
@@ -56,6 +61,19 @@ if os.getenv("LINKEDIN_CLIENT_ID") and os.getenv("LINKEDIN_CLIENT_SECRET"):
         client_kwargs={"scope": "openid profile email"},
     )
 app.include_router(authentication_router)
+app.include_router(google_sheets_router)
+
+
+@app.on_event("startup")
+async def start_google_sheets_worker():
+    app.state.google_sheets_worker = asyncio.create_task(sheets_sync_worker())
+
+
+@app.on_event("shutdown")
+async def stop_google_sheets_worker():
+    task = getattr(app.state, "google_sheets_worker", None)
+    if task:
+        task.cancel()
 
 
 def serialize_event(event: ApplicationEvent) -> dict:

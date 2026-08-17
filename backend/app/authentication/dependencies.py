@@ -7,10 +7,12 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User
 from .security import read_token
+from .session_policy import authenticated_session
 
 
 def current_user(request: Request, db: Session = Depends(get_db)) -> User:
-    user_id = request.session.get("user_id")
+    session = authenticated_session(request)
+    user_id = session.user_id if session else None
     authorization = request.headers.get("Authorization", "")
     if authorization.lower().startswith("bearer "):
         user_id = read_token(authorization.split(" ", 1)[1].strip())

@@ -32,7 +32,17 @@ import {
   PanelLeftClose,
   SlidersHorizontal,
 } from "lucide-react";
-import { AccountCard, AuthGate, getCurrentUser, signOut, type AuthUser } from "./authentication";
+import {
+  AccountCard,
+  AuthGate,
+  getCurrentUser,
+  monitorSessionActivity,
+  notifySessionExpired,
+  onSessionExpired,
+  signOut,
+  type AuthUser,
+} from "./authentication";
+import { GoogleSheetsCard } from "./integrations/google-sheets/GoogleSheetsCard";
 
 const STATUSES = [
   "PENDING_CONFIRMATION",
@@ -48,6 +58,7 @@ const STATUSES = [
   "NO_RESPONSE",
   "CLOSED",
 ] as const;
+const FINISHED_STATUSES: Status[] = ["REJECTED", "WITHDRAWN", "CLOSED"];
 type Status = (typeof STATUSES)[number];
 type TimelineEvent = {
   id: number;
@@ -194,12 +205,15 @@ const formatDateTime = (value: string) =>
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(value));
+const scrollPageTop = () =>
+  window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
 async function api<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...options,
     credentials: "include",
     headers: { "Content-Type": "application/json", ...options?.headers },
   });
+  if (response.status === 401) notifySessionExpired();
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new Error(body.detail || "Something went wrong");
@@ -981,12 +995,13 @@ export default function App() {
   const [sortBy, setSortBy] = useState("NEWEST");
   const [roleFilter, setRoleFilter] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeMetric, setActiveMetric] = useState<string | null>(null);
   const [selected, setSelected] = useState<Application | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ ...emptyApplication });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [nav, setNav] = useState(false);
+  const [nav, setNav] = useState(() => matchMedia("(max-width: 1024px)").matches);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationMutedUntil, setNotificationMutedUntil] = useState(
     () => Number(localStorage.getItem("trajectory-notifications-seen-until") || 0),
@@ -1003,6 +1018,26 @@ export default function App() {
     getCurrentUser()
       .then(setAuthUser)
       .catch(() => setAuthUser(null));
+  }, []);
+  useEffect(() => {
+    if (!authUser) return;
+    const stopMonitoring = monitorSessionActivity();
+    const stopListening = onSessionExpired(() => {
+      setAuthUser(null);
+      setApplications([]);
+      setSelected(null);
+      setError("");
+    });
+    return () => {
+      stopMonitoring();
+      stopListening();
+    };
+  }, [authUser]);
+  useEffect(() => {
+    const responsiveNav = matchMedia("(max-width: 1024px)");
+    const adaptNavigation = (event: MediaQueryListEvent) => setNav(event.matches);
+    responsiveNav.addEventListener("change", adaptNavigation);
+    return () => responsiveNav.removeEventListener("change", adaptNavigation);
   }, []);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -1040,6 +1075,23 @@ export default function App() {
     setNotificationsOpen((value) => !value);
     if (!notificationsOpen && attentionCount) markNotificationsSeen();
   };
+  const showDashboardGroup = (value: string) => {
+    setActiveMetric(value);
+    setFilter(value);
+    setSearch("");
+    setLocationFilter("ALL");
+    setDateFilter("ALL");
+    setRoleFilter("");
+    setFiltersOpen(false);
+    scrollPageTop();
+  };
+  useEffect(() => {
+    const clearMetricHighlight = (event: MouseEvent) => {
+      if (!(event.target as Element | null)?.closest(".stat-card")) setActiveMetric(null);
+    };
+    document.addEventListener("click", clearMetricHighlight);
+    return () => document.removeEventListener("click", clearMetricHighlight);
+  }, []);
   const enableNotifications = async () => {
     if (!("Notification" in window)) return;
     const permission = await Notification.requestPermission();
@@ -1120,8 +1172,20 @@ export default function App() {
     });
     localStorage.setItem(key, "true");
   }, [attentionCount, dashboard.by_status.PENDING_CONFIRMATION, dashboard.follow_ups_due]);
-  const open = async (app: Application) =>
+  const open = async (app: Application) => {
     setSelected(await api<Application>(`/api/applications/${app.id}`));
+    scrollPageTop();
+  };
+  const closeWorkspace = () => {
+    setSelected(null);
+    scrollPageTop();
+  };
+  const selectApplicationFilter = (value: string) => {
+    setFilter(value);
+    setActiveMetric(null);
+    if (matchMedia("(max-width: 1024px)").matches) setNav(false);
+    scrollPageTop();
+  };
   const refresh = async (app: Application) => {
     setSelected(app);
     await load();
@@ -1132,7 +1196,7 @@ export default function App() {
       confirm(`Delete ${selected.role} at ${selected.company}?`)
     ) {
       await api(`/api/applications/${selected.id}`, { method: "DELETE" });
-      setSelected(null);
+      closeWorkspace();
       await load();
     }
   };
@@ -1172,7 +1236,10 @@ export default function App() {
           (filter === "ALL" ||
             (filter === "FOLLOW_UP" &&
               a.follow_up_at &&
-              a.follow_up_at <= today()) ||
+              a.follow_up_at <= today() &&
+              !FINISHED_STATUSES.includes(a.status)) ||
+            (filter === "INTERVIEW" &&
+              ["INTERVIEW", "TECHNICAL_INTERVIEW", "FINAL_INTERVIEW"].includes(a.status)) ||
             a.status === filter) &&
           (locationFilter === "ALL" || a.location === locationFilter) &&
           (!cutoff || Boolean(applied && applied >= cutoff)) &&
@@ -1211,7 +1278,7 @@ export default function App() {
     return (
       <ApplicationWorkspace
         application={selected}
-        onClose={() => setSelected(null)}
+        onClose={closeWorkspace}
         onRefresh={refresh}
         onDelete={remove}
         theme={theme}
@@ -1246,18 +1313,19 @@ export default function App() {
           </button>
         </div>
         <nav>
-          <button className="nav-item active">
+          <button className={`nav-item ${filter === "ALL" ? "active" : ""}`} onClick={() => selectApplicationFilter("ALL")}>
             <LayoutDashboard size={18} />
             Overview
           </button>
-          <button className="nav-item" onClick={() => setFilter("ALL")}>
-            <BriefcaseBusiness size={18} />
-            Applications <span>{dashboard.total}</span>
+          <button className={`nav-item ${filter === "INTERVIEW" ? "active" : ""}`} onClick={() => selectApplicationFilter("INTERVIEW")}>
+            <Send size={18} />
+            Interviews <span>{dashboard.interviews}</span>
           </button>
-          <button className="nav-item" onClick={() => setFilter("FOLLOW_UP")}>
+          <button className={`nav-item ${filter === "FOLLOW_UP" ? "active" : ""}`} onClick={() => selectApplicationFilter("FOLLOW_UP")}>
             <CalendarClock size={18} />
             Follow-ups <span>{dashboard.follow_ups_due}</span>
           </button>
+          <GoogleSheetsCard />
         </nav>
         <div className="sidebar-spacer" />
         <AccountCard user={authUser} onSignOut={async () => { await signOut(); setAuthUser(null); }} />
@@ -1335,12 +1403,12 @@ export default function App() {
           {error && <div className="error-banner">{error}</div>}
           <section className="stats-grid">
             {[
-              ["Total applications", dashboard.total, <BriefcaseBusiness />],
-              ["Follow-ups due", dashboard.follow_ups_due, <CalendarClock />],
-              ["Active interviews", dashboard.interviews, <Send />],
-              ["Offers", dashboard.offers, <Check />],
-            ].map(([title, value, icon], i) => (
-              <article className="stat-card" key={String(title)}>
+              ["Total applications", dashboard.total, <BriefcaseBusiness />, "ALL"],
+              ["Follow-ups due", dashboard.follow_ups_due, <CalendarClock />, "FOLLOW_UP"],
+              ["Active interviews", dashboard.interviews, <Send />, "INTERVIEW"],
+              ["Offers", dashboard.offers, <Check />, "OFFER"],
+            ].map(([title, value, icon, target], i) => (
+              <button type="button" className={`stat-card ${activeMetric === target ? "selected" : ""}`} key={String(title)} onClick={() => showDashboardGroup(String(target))}>
                 <div>
                   <span>{title}</span>
                   <strong>{value}</strong>
@@ -1355,21 +1423,21 @@ export default function App() {
                 >
                   {icon}
                 </span>
-              </article>
+              </button>
             ))}
           </section>
-          <section className="workspace-card">
+          <section className="workspace-card" id="applications-workspace">
             <div className="workspace-header">
               <div>
                 <h2>Applications</h2>
                 <p>Open any card for the complete workspace</p>
               </div>
               <div className="filter-tabs">
-                {["ALL", "PENDING_CONFIRMATION", "APPLIED", "INTERVIEW", "FOLLOW_UP"].map((v) => (
+                {["ALL", "PENDING_CONFIRMATION", "APPLIED", "INTERVIEW", "FOLLOW_UP", "CLOSED"].map((v) => (
                   <button
                     key={v}
                     className={filter === v ? "active" : ""}
-                    onClick={() => setFilter(v)}
+                    onClick={() => selectApplicationFilter(v)}
                   >
                     {v === "FOLLOW_UP"
                       ? "Needs follow-up"

@@ -2,7 +2,7 @@ JobTRACKER/
 |-- .gitignore
 |-- LICENSE
 |-- README.md
-|-- project_stuructre.txt
+|-- project_structure.txt
 |
 |-- db_backups/                         # Local only; ignored by Git
 |   `-- job_tracker_2026-08-16.dump
@@ -18,12 +18,23 @@ JobTRACKER/
 |   |   |-- main.py
 |   |   |-- models.py
 |   |   |-- schemas.py
-|   |   `-- authentication/
+|   |   |-- authentication/
 |   |       |-- __init__.py
 |   |       |-- dependencies.py
 |   |       |-- oauth.py
 |   |       |-- router.py
-|   |       `-- security.py
+|   |       |-- security.py
+|   |       `-- session_policy.py
+|   |   `-- integrations/
+|   |       |-- __init__.py
+|   |       `-- google_sheets/
+|   |           |-- __init__.py
+|   |           |-- client.py
+|   |           |-- router.py
+|   |           |-- service.py
+|   |           |-- sheet_builder.py
+|   |           |-- tokens.py
+|   |           `-- worker.py
 |   `-- migrations/
 |       |-- env.py
 |       |-- script.py.mako
@@ -31,7 +42,8 @@ JobTRACKER/
 |           |-- 20260813_0001_initial_postgresql.py
 |           |-- 20260813_0002_application_workspace.py
 |           |-- 20260813_0003_application_contacts.py
-|           `-- 20260816_0004_users_and_ownership.py
+|           |-- 20260816_0004_users_and_ownership.py
+|           `-- 20260817_0005_google_sheet_connections.py
 |
 |-- extension/
 |   |-- README.md
@@ -50,6 +62,23 @@ JobTRACKER/
 |       |-- popup.js
 |       `-- popup.css
 |
+|-- google_sheets_mirror/
+|   |-- .env.example
+|   |-- README.md
+|   |-- requirements.txt
+|   |-- sync.py
+|   |-- watch.py
+|   |-- credentials/                    # Local OAuth files; ignored by Git
+|   |-- state/                          # Local spreadsheet ID; ignored by Git
+|   |-- src/
+|   |   |-- __init__.py
+|   |   |-- config.py
+|   |   |-- database_reader.py
+|   |   |-- sheets_client.py
+|   |   `-- transformer.py
+|   `-- tests/
+|       `-- test_transformer.py
+|
 |-- frontend/
 |   |-- index.html
 |   |-- package.json
@@ -62,11 +91,16 @@ JobTRACKER/
 |       |-- App.tsx
 |       |-- styles.css
 |       |-- vite-env.d.ts
-|       `-- authentication/
+|       |-- authentication/
 |           |-- AuthGate.tsx
 |           |-- auth.ts
 |           |-- authentication.css
-|           `-- index.ts
+|           |-- index.ts
+|           `-- session.ts
+|       `-- integrations/
+|           `-- google-sheets/
+|               |-- GoogleSheetsCard.tsx
+|               `-- google-sheets.css
 |
 `-- screenshots/
     |-- application-details.png

@@ -6,7 +6,7 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from ..models import User
 
 
-TOKEN_MAX_AGE = int(os.getenv("AUTH_TOKEN_MAX_AGE_SECONDS", "2592000"))
+TOKEN_MAX_AGE = int(os.getenv("AUTH_TOKEN_MAX_AGE_SECONDS", "1800"))
 
 
 def _serializer() -> URLSafeTimedSerializer:

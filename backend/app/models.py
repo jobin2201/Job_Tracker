@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, String, Text, func
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -62,6 +62,29 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     applications: Mapped[list["Application"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    google_sheet_connection: Mapped[Optional["GoogleSheetConnection"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", uselist=False
+    )
+
+
+class GoogleSheetConnection(Base):
+    __tablename__ = "google_sheet_connections"
+    __table_args__ = (UniqueConstraint("user_id", name="uq_google_sheet_connections_user_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    google_account_email: Mapped[str] = mapped_column(String(320))
+    spreadsheet_id: Mapped[str] = mapped_column(String(255), default="")
+    encrypted_token: Mapped[str] = mapped_column(Text)
+    last_sync_error: Mapped[str] = mapped_column(Text, default="")
+    last_synced_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    user: Mapped["User"] = relationship(back_populates="google_sheet_connection")
 
 
 class ApplicationEvent(Base):

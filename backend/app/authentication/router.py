@@ -12,6 +12,7 @@ from ..models import Application, User
 from .dependencies import current_user
 from .oauth import google_oauth
 from .security import issue_token
+from .session_policy import authenticated_session, record_activity, start_session
 
 
 router = APIRouter(tags=["authentication"])
@@ -62,6 +63,10 @@ async def google_extension_login(request: Request, redirect_uri: str):
 
 @router.get("/auth/google/callback", name="google_callback")
 async def google_callback(request: Request, db: Session = Depends(get_db)):
+    if request.session.get("google_sheets_connect_user_id"):
+        from ..integrations.google_sheets import complete_google_sheets_oauth
+
+        return await complete_google_sheets_oauth(request, db)
     try:
         token = await _client().authorize_access_token(request)
         userinfo = token.get("userinfo") or await _client().userinfo(token=token)
@@ -86,10 +91,13 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
                     application.user_id = user.id
     user.email = email
     user.name = str(userinfo.get("name", "")).strip()
-    user.picture_url = str(userinfo.get("picture", "")).strip()
+    id_token_claims = token.get("id_token_claims") or {}
+    user.picture_url = str(
+        userinfo.get("picture") or token.get("picture") or id_token_claims.get("picture") or user.picture_url or ""
+    ).strip()
     db.commit()
     db.refresh(user)
-    request.session["user_id"] = user.id
+    start_session(request, user.id)
     extension_redirect = request.session.pop("extension_redirect", "")
     if extension_redirect:
         return RedirectResponse(f"{extension_redirect}#token={quote(issue_token(user))}")
@@ -103,13 +111,20 @@ def auth_me(user: User = Depends(current_user)):
 
 @router.get("/auth/google/status")
 def google_status(request: Request, db: Session = Depends(get_db)):
-    user_id = request.session.get("user_id")
-    user = db.get(User, int(user_id)) if user_id else None
+    session = authenticated_session(request)
+    user = db.get(User, session.user_id) if session else None
     return {
         "configured": bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET")),
         "authenticated": user is not None,
         "user": {"email": user.email, "name": user.name, "picture_url": user.picture_url} if user else None,
     }
+
+
+@router.post("/api/auth/activity", status_code=status.HTTP_204_NO_CONTENT)
+def auth_activity(request: Request, user: User = Depends(current_user)):
+    if not record_activity(request):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Your session has expired. Sign in again.")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
