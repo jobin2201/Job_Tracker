@@ -17,7 +17,9 @@ def _serializer() -> URLSafeTimedSerializer:
 
 
 def issue_token(user: User) -> str:
-    return _serializer().dumps({"user_id": user.id, "google_subject": user.google_subject})
+    # Signed tokens are integrity-protected but not encrypted. Only include the
+    # minimum identifier needed to resolve the authenticated user.
+    return _serializer().dumps({"user_id": user.id})
 
 
 def read_token(token: str) -> Optional[int]:

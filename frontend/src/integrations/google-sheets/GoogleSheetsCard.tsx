@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, ExternalLink, RefreshCw, Sheet } from "lucide-react";
-import { apiUrl, notifySessionExpired } from "../../authentication";
+import { apiFetch, apiUrl, notifySessionExpired } from "../../authentication";
 import "./google-sheets.css";
 
 
@@ -18,7 +18,7 @@ export function GoogleSheetsCard() {
   const [syncing, setSyncing] = useState(false);
 
   const load = async () => {
-    const response = await fetch(apiUrl("/api/google-sheets/status"), { credentials: "include" });
+    const response = await apiFetch("/api/google-sheets/status");
     if (response.status === 401) notifySessionExpired();
     if (response.ok) setStatus(await response.json());
   };
@@ -30,9 +30,8 @@ export function GoogleSheetsCard() {
   const retrySync = async () => {
     setSyncing(true);
     try {
-      const response = await fetch(apiUrl("/api/google-sheets/sync"), {
+      const response = await apiFetch("/api/google-sheets/sync", {
         method: "POST",
-        credentials: "include",
       });
       if (response.status === 401) notifySessionExpired();
       await load();

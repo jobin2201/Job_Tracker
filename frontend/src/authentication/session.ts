@@ -1,4 +1,4 @@
-import { apiUrl } from "./auth";
+import { apiFetch } from "./auth";
 
 const SESSION_EXPIRED_EVENT = "job-tracker-session-expired";
 const ACTIVITY_THROTTLE_MS = 60_000;
@@ -22,9 +22,8 @@ export function monitorSessionActivity(): () => void {
     sending = true;
     lastSentAt = now;
     try {
-      const response = await fetch(apiUrl("/api/auth/activity"), {
+      const response = await apiFetch("/api/auth/activity", {
         method: "POST",
-        credentials: "include",
       });
       if (response.status === 401) notifySessionExpired();
     } catch {

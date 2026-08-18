@@ -108,7 +108,14 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     extension_redirect = request.session.pop("extension_redirect", "")
     if extension_redirect:
         return RedirectResponse(f"{extension_redirect}#token={quote(issue_token(user))}")
-    return RedirectResponse(request.session.pop("auth_next", _safe_frontend_redirect("")))
+    destination = request.session.pop("auth_next", _safe_frontend_redirect(""))
+    if destination.startswith("https://"):
+        # Browsers commonly block Render's cookie when the Vercel frontend
+        # calls it as a third party (especially in Incognito). A short-lived,
+        # signed token in the fragment is not sent to Vercel and is consumed
+        # immediately by the frontend. Local development keeps cookie auth.
+        return RedirectResponse(f"{destination}#auth_token={quote(issue_token(user))}")
+    return RedirectResponse(destination)
 
 
 @router.get("/api/auth/me")
@@ -129,7 +136,8 @@ def google_status(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/api/auth/activity", status_code=status.HTTP_204_NO_CONTENT)
 def auth_activity(request: Request, user: User = Depends(current_user)):
-    if not record_activity(request):
+    authorization = request.headers.get("Authorization", "")
+    if not record_activity(request) and not authorization.lower().startswith("bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Your session has expired. Sign in again.")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

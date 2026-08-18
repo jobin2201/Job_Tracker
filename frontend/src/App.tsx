@@ -35,7 +35,7 @@ import {
 import {
   AccountCard,
   AuthGate,
-  apiUrl,
+  apiFetch,
   getCurrentUser,
   monitorSessionActivity,
   notifySessionExpired,
@@ -209,9 +209,8 @@ const formatDateTime = (value: string) =>
 const scrollPageTop = () =>
   window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
 async function api<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(apiUrl(url), {
+  const response = await apiFetch(url, {
     ...options,
-    credentials: "include",
     headers: { "Content-Type": "application/json", ...options?.headers },
   });
   if (response.status === 401) notifySessionExpired();
