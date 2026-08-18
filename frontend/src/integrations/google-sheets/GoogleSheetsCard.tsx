@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, ExternalLink, RefreshCw, Sheet } from "lucide-react";
-import { notifySessionExpired } from "../../authentication";
+import { apiUrl, notifySessionExpired } from "../../authentication";
 import "./google-sheets.css";
 
 
@@ -18,7 +18,7 @@ export function GoogleSheetsCard() {
   const [syncing, setSyncing] = useState(false);
 
   const load = async () => {
-    const response = await fetch("/api/google-sheets/status", { credentials: "include" });
+    const response = await fetch(apiUrl("/api/google-sheets/status"), { credentials: "include" });
     if (response.status === 401) notifySessionExpired();
     if (response.ok) setStatus(await response.json());
   };
@@ -30,7 +30,7 @@ export function GoogleSheetsCard() {
   const retrySync = async () => {
     setSyncing(true);
     try {
-      const response = await fetch("/api/google-sheets/sync", {
+      const response = await fetch(apiUrl("/api/google-sheets/sync"), {
         method: "POST",
         credentials: "include",
       });
@@ -51,7 +51,7 @@ export function GoogleSheetsCard() {
   }
   if (!status.connected) {
     return (
-      <a className="sheets-nav-item" href="http://127.0.0.1:8000/api/google-sheets/connect" title="Set up your private Google Sheet">
+      <a className="sheets-nav-item" href={apiUrl("/api/google-sheets/connect")} title="Set up your private Google Sheet">
         <Sheet size={18} />
         <span className="sheets-copy"><strong>Google Sheets</strong><small>Set up spreadsheet</small></span>
         <ExternalLink className="sheets-trailing" size={14} />

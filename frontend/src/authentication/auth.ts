@@ -5,11 +5,16 @@ export type AuthUser = {
   picture_url: string;
 };
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
+
+export function apiUrl(path: string): string {
+  return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 export async function getCurrentUser(): Promise<AuthUser> {
-  const response = await fetch("/api/auth/me", {
+  const response = await fetch(apiUrl("/api/auth/me"), {
     credentials: "include",
   });
 
@@ -19,14 +24,14 @@ export async function getCurrentUser(): Promise<AuthUser> {
 }
 
 export async function signOut(): Promise<void> {
-  await fetch(`${API_BASE_URL}/api/auth/logout`, {
+  await fetch(apiUrl("/api/auth/logout"), {
     method: "POST",
     credentials: "include",
   });
 }
 
 export function googleLoginUrl(): string {
-  return `${API_BASE_URL}/auth/google?next=${encodeURIComponent(
+  return `${apiUrl("/auth/google")}?next=${encodeURIComponent(
     window.location.origin
   )}`;
 }

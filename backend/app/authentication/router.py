@@ -29,16 +29,23 @@ def _client():
 
 
 def _safe_frontend_redirect(value: str) -> str:
-    fallback = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
+    fallback = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173").rstrip("/")
     if not value:
         return fallback
+
     parsed = urlparse(value)
     fallback_parsed = urlparse(fallback)
-    allowed_ports = {fallback_parsed.port, 5173}
-    if parsed.scheme in {"http", "https"} and parsed.hostname in {"localhost", "127.0.0.1"} and parsed.port in allowed_ports:
-        # OAuth and the dashboard must use the same hostname. Cookies ignore
-        # ports but do not cross between localhost and 127.0.0.1.
+    if not parsed.scheme or not parsed.netloc or parsed.username or parsed.password:
         return fallback
+
+    requested_origin = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+    fallback_origin = f"{fallback_parsed.scheme}://{fallback_parsed.netloc}".rstrip("/")
+    local_origins = {"http://127.0.0.1:5173", "http://localhost:5173"}
+
+    # The deployed frontend is controlled by FRONTEND_URL. Local origins stay
+    # available for development without permitting an arbitrary OAuth redirect.
+    if requested_origin == fallback_origin or requested_origin in local_origins:
+        return requested_origin
     return fallback
 
 

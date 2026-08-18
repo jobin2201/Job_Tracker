@@ -31,17 +31,22 @@ from .schemas import (
 
 
 app = FastAPI(title="Job Tracker API", version="0.2.0")
+frontend_url = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173").rstrip("/")
+secure_frontend = frontend_url.startswith("https://")
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv("SESSION_SECRET", "local-development-only"),
-    same_site="lax",
-    https_only=False,
+    # Vercel and Render are different sites, so production credentialed API
+    # requests require SameSite=None and Secure. Local HTTP development keeps
+    # the existing Lax, non-Secure behavior.
+    same_site="none" if secure_frontend else "lax",
+    https_only=secure_frontend,
     max_age=ACCESS_SESSION_SECONDS,
 )
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        os.getenv("FRONTEND_URL", "http://127.0.0.1:5173"),
+        frontend_url,
         "http://localhost:5173",
         "chrome-extension://*",
     ],
