@@ -1,6 +1,5 @@
-importScripts("authentication/auth.js");
+importScripts("config.js", "authentication/auth.js");
 
-const API_URL = "http://127.0.0.1:8000";
 const CONFIRMED_IMPORTS_KEY = "jobTrackerConfirmedImports";
 const RECOVERY_DELAY_MS = 1000;
 let recoveryTimer = null;
@@ -13,7 +12,7 @@ async function showReadyNotification() {
   await chrome.notifications.create("job-tracker-ready", {
     type: "basic",
     iconUrl: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='28' fill='%2328765d'/%3E%3Ccircle cx='64' cy='64' r='39' fill='none' stroke='white' stroke-width='8'/%3E%3Ccircle cx='64' cy='64' r='20' fill='none' stroke='white' stroke-width='8'/%3E%3Ccircle cx='64' cy='64' r='6' fill='white'/%3E%3C/svg%3E",
-    title: "Job Tracker is connected",
+    title: "MyStratos is connected",
     message: "Open LinkedIn or Indeed to start tracking applications.",
   });
 }
@@ -30,7 +29,7 @@ async function showConnectionToast(tabId, platform) {
         toast.id = "job-tracker-connection-toast";
         toast.setAttribute("role", "status");
         toast.style.cssText = "position:fixed;right:22px;bottom:22px;z-index:2147483647;max-width:360px;padding:14px 17px;border:1px solid rgba(255,255,255,.2);border-radius:14px;color:#fff;background:linear-gradient(135deg,#174f3d,#28765d);box-shadow:0 16px 45px rgba(13,45,35,.35);font:600 13px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s";
-        toast.innerHTML = `<div style="font-size:14px;font-weight:800">✓ Job Tracker connected to ${site}</div><div style="margin-top:3px;opacity:.82;font-size:11px"></div>`;
+        toast.innerHTML = `<div style="font-size:14px;font-weight:800">✓ MyStratos connected to ${site}</div><div style="margin-top:3px;opacity:.82;font-size:11px"></div>`;
         toast.lastElementChild.textContent = account;
         document.documentElement.appendChild(toast);
         requestAnimationFrame(() => { toast.style.opacity = "1"; toast.style.transform = "translateY(0)"; });
@@ -89,7 +88,7 @@ async function retryConfirmedImports() {
   let changed = false;
   for (const [externalJobId, entry] of Object.entries(items)) {
     try {
-      const response = await JobTrackerAuth.authenticatedFetch(`${API_URL}/api/linkedin/import`, {
+      const response = await JobTrackerAuth.authenticatedFetch("/api/linkedin/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(entry.job),
@@ -132,7 +131,7 @@ showReadyNotification().catch(() => {});
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   scheduleConfirmedImportRecovery();
   if (message.type === "TEST_API_CONNECTION") {
-    Promise.all([fetch(`${API_URL}/health`), JobTrackerAuth.currentUser()])
+    Promise.all([JobTrackerAuth.authenticatedFetch("/health"), JobTrackerAuth.currentUser()])
       .then(async ([response, user]) => {
         const body = await response.json();
         if (!response.ok) throw new Error(body.detail || "Health check failed");
@@ -158,7 +157,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         : "[Job Tracker] Sending confirmed Indeed application to FastAPI",
       payload,
     );
-    JobTrackerAuth.authenticatedFetch(`${API_URL}/api/indeed/import`, {
+    JobTrackerAuth.authenticatedFetch("/api/indeed/import", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -168,7 +167,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         if (!response.ok) {
           let detail = body?.detail;
           if (Array.isArray(detail)) detail = detail.map((item) => item?.msg || String(item)).join("; ");
-          throw new Error(detail || body?.message || `Job Tracker rejected the Indeed import (${response.status})`);
+          throw new Error(detail || body?.message || `MyStratos rejected the Indeed import (${response.status})`);
         }
         return body;
       })
@@ -193,7 +192,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       : "[Job Tracker] Sending confirmed LinkedIn application to FastAPI",
     payload,
   );
-  JobTrackerAuth.authenticatedFetch(`${API_URL}/api/linkedin/import`, {
+  JobTrackerAuth.authenticatedFetch("/api/linkedin/import", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -218,7 +217,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         } else if (detail && typeof detail === "object") {
           detail = JSON.stringify(detail);
         }
-        throw new Error(detail || body?.message || `Job Tracker rejected the import (${response.status})`);
+        throw new Error(detail || body?.message || `MyStratos rejected the import (${response.status})`);
       }
       return body;
     })

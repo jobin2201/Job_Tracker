@@ -65,6 +65,14 @@ button {
 .brand-mark svg {
   transform: rotate(4deg);
 }
+.brand > span[role="button"] {
+  cursor: pointer;
+}
+.brand > span[role="button"]:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.72);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
 .mobile-close,
 .mobile-menu {
   display: none;

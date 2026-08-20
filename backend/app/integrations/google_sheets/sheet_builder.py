@@ -47,7 +47,7 @@ def build_user_sheets(db: Session, user: User) -> dict[str, list[list]]:
     pending = [item for item in follow_ups if not item.is_completed and item.scheduled_for]
 
     dashboard = [
-        ["JOB TRACKER OVERVIEW"], [user.email],
+        ["MYSTRATOS OVERVIEW"], [user.email],
         ["Last synchronized", datetime.now().astimezone().isoformat(timespec="seconds")], [],
         ["Metric", "Count"], ["Total applications", len(applications)],
         ["Follow-ups due", sum(item.scheduled_for <= today for item in pending)],

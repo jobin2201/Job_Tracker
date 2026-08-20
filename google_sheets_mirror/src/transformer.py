@@ -32,7 +32,7 @@ def _dashboard(snapshot: dict) -> list[list[Any]]:
     week_end = today + timedelta(days=7)
     pending = [item for item in snapshot["follow_ups"] if not item["is_completed"] and item["scheduled_for"]]
     rows = [
-        ["JOB TRACKER OVERVIEW"],
+        ["MYSTRATOS OVERVIEW"],
         [snapshot["user"]["email"]],
         ["Last synchronized", datetime.now().astimezone().isoformat(timespec="seconds")],
         [],

@@ -56,7 +56,7 @@ async def complete_google_sheets_oauth(request: Request, db: Session) -> Redirec
         userinfo = token.get("userinfo") or await _client().userinfo(token=token)
         google_email = str(userinfo.get("email", "")).strip().lower()
         if google_email != user.email.strip().lower():
-            raise ValueError("Connect Google Sheets using the same Google account as Job Tracker")
+            raise ValueError("Connect Google Sheets using the same Google account as MyStratos")
         existing = _connection(db, user.id)
         if existing and not token.get("refresh_token"):
             previous = decrypt_token(existing.encrypted_token)

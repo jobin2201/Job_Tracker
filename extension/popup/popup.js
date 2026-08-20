@@ -2,8 +2,17 @@ const statusNode = document.getElementById("status");
 const signin = document.getElementById("signin");
 const signout = document.getElementById("signout");
 const account = document.getElementById("account");
+const dashboard = document.getElementById("dashboard");
+const useLocal = document.getElementById("use-local");
 
 document.getElementById("version").textContent = `v${chrome.runtime.getManifest().version}`;
+
+async function showEnvironment() {
+  const environment = await JobTrackerConfig.environment();
+  useLocal.checked = environment === "local";
+  dashboard.href = await JobTrackerConfig.dashboardUrl();
+  dashboard.textContent = environment === "local" ? "Open local dashboard" : "Open dashboard";
+}
 
 async function showAccount() {
   const user = await JobTrackerAuth.currentUser();
@@ -55,6 +64,25 @@ document.getElementById("reconnect").addEventListener("click", () => {
   });
 });
 
-showAccount().catch(() => {
-  statusNode.textContent = "Start the local Job Tracker backend";
+useLocal.addEventListener("change", async () => {
+  useLocal.disabled = true;
+  try {
+    await JobTrackerConfig.setEnvironment(useLocal.checked ? "local" : "production");
+    await showEnvironment();
+    await showAccount();
+    statusNode.textContent = useLocal.checked
+      ? "Local development mode — sign in to the local backend"
+      : "Production mode — sign in to your hosted workspace";
+  } catch (error) {
+    useLocal.checked = false;
+    statusNode.textContent = `Environment change failed: ${error.message}`;
+  } finally {
+    useLocal.disabled = false;
+  }
+});
+
+Promise.all([showEnvironment(), showAccount()]).catch(() => {
+  statusNode.textContent = useLocal.checked
+    ? "Start the local MyStratos backend"
+    : "Could not reach the hosted MyStratos service";
 });

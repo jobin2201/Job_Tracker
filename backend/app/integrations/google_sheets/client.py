@@ -48,6 +48,16 @@ def replace_sheet(credentials: Credentials, spreadsheet_id: str, title: str, she
         }).execute()
         spreadsheet_id = result["spreadsheetId"]
     metadata = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+    if metadata.get("properties", {}).get("title") != title:
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=spreadsheet_id,
+            body={"requests": [{
+                "updateSpreadsheetProperties": {
+                    "properties": {"title": title},
+                    "fields": "title",
+                },
+            }]},
+        ).execute()
     existing = {item["properties"]["title"]: item["properties"]["sheetId"] for item in metadata["sheets"]}
     missing = [name for name in SHEET_ORDER if name not in existing]
     if missing:

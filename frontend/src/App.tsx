@@ -1096,7 +1096,7 @@ export default function App() {
     if (!("Notification" in window)) return;
     const permission = await Notification.requestPermission();
     if (permission === "granted" && attentionCount) {
-      new Notification("Job Tracker reminders", {
+      new Notification("MyStratos reminders", {
         body: `${attentionCount} application${attentionCount === 1 ? " needs" : "s need"} your attention.`,
       });
       markNotificationsSeen();
@@ -1107,7 +1107,7 @@ export default function App() {
     if (Notification.permission !== "granted") return;
     const signature = `${attentionCount}:${dashboard.follow_ups_due}:${dashboard.by_status.PENDING_CONFIRMATION || 0}`;
     if (localStorage.getItem("trajectory-last-notification") === signature) return;
-    new Notification("Job Tracker reminders", {
+    new Notification("MyStratos reminders", {
       body: `${attentionCount} application${attentionCount === 1 ? " needs" : "s need"} your attention.`,
     });
     localStorage.setItem("trajectory-last-notification", signature);
@@ -1167,7 +1167,7 @@ export default function App() {
     if (!("Notification" in window) || Notification.permission !== "granted" || !attentionCount) return;
     const key = `trajectory-notified-${today()}-${attentionCount}`;
     if (localStorage.getItem(key)) return;
-    new Notification("Job Tracker needs your attention", {
+    new Notification("MyStratos needs your attention", {
       body: `${dashboard.by_status.PENDING_CONFIRMATION || 0} pending confirmation and ${dashboard.follow_ups_due} follow-up reminder(s).`,
     });
     localStorage.setItem(key, "true");
@@ -1291,13 +1291,21 @@ export default function App() {
         <div className="brand">
           <button
             className="brand-mark"
-            onClick={() => navCollapsed && setNavCollapsed(false)}
-            title={navCollapsed ? "Expand navigation" : undefined}
-            aria-label={navCollapsed ? "Expand navigation" : "Trajectory"}
+            onClick={() => navCollapsed ? setNavCollapsed(false) : selectApplicationFilter("ALL")}
+            title={navCollapsed ? "Expand navigation" : "Open overview"}
+            aria-label={navCollapsed ? "Expand navigation" : "MyStratos overview"}
           >
             <Target size={21} />
           </button>
-          <span>Trajectory</span>
+          <span
+            role="button"
+            tabIndex={0}
+            title="Open overview"
+            onClick={() => selectApplicationFilter("ALL")}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") selectApplicationFilter("ALL");
+            }}
+          >MyStratos</span>
           {!navCollapsed && (
             <button
               className="collapse-nav"

@@ -17,7 +17,7 @@ def sync_connection(db: Session, connection: GoogleSheetConnection, user: User) 
         spreadsheet_id, spreadsheet_url = replace_sheet(
             credentials,
             connection.spreadsheet_id,
-            f"Job Tracker — {user.email}",
+            f"MyStratos — {user.email}",
             sheets,
         )
         connection.spreadsheet_id = spreadsheet_id

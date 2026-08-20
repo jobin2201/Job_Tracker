@@ -23,4 +23,4 @@ def current_user(request: Request, db: Session = Depends(get_db)) -> User:
         legacy = db.scalar(select(User).where(User.google_subject == "legacy-local-owner"))
         if legacy:
             return legacy
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sign in to Job Tracker")
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sign in to MyStratos")

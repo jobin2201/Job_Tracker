@@ -48,13 +48,24 @@ class GoogleSheetsMirror:
         spreadsheet_id = self._saved_spreadsheet_id()
         if not spreadsheet_id:
             result = self.service.spreadsheets().create(body={
-                "properties": {"title": f"Job Tracker — {self.settings.user_email}"},
+                "properties": {"title": f"MyStratos — {self.settings.user_email}"},
                 "sheets": [{"properties": {"title": title}} for title in SHEET_ORDER],
             }).execute()
             spreadsheet_id = result["spreadsheetId"]
             self._save_spreadsheet_id(spreadsheet_id)
             return spreadsheet_id, result["spreadsheetUrl"]
         metadata = self.service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        title = f"MyStratos — {self.settings.user_email}"
+        if metadata.get("properties", {}).get("title") != title:
+            self.service.spreadsheets().batchUpdate(
+                spreadsheetId=spreadsheet_id,
+                body={"requests": [{
+                    "updateSpreadsheetProperties": {
+                        "properties": {"title": title},
+                        "fields": "title",
+                    },
+                }]},
+            ).execute()
         existing = {sheet["properties"]["title"] for sheet in metadata["sheets"]}
         missing = [title for title in SHEET_ORDER if title not in existing]
         if missing:

@@ -45,7 +45,7 @@
     node.className = `job-tracker-indeed-toast ${kind}`;
     const heading = document.createElement("strong");
     const copy = document.createElement("span");
-    heading.textContent = "Job Tracker";
+    heading.textContent = "MyStratos";
     copy.textContent = message;
     node.append(heading, copy);
     document.body.appendChild(node);
@@ -197,7 +197,7 @@
         chrome.runtime.sendMessage({ type, payload: job }, (response) => {
           if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
           else if (response?.ok) resolve(response);
-          else reject(new Error(response?.error || "Could not reach Job Tracker."));
+          else reject(new Error(response?.error || "Could not reach MyStratos."));
         });
       } catch (error) { reject(error); }
     });
@@ -219,7 +219,7 @@
       const response = await sendMessage("IMPORT_INDEED_JOB", payload);
       sessionStorage.setItem(`${RECORDED_PREFIX}${job.external_job_id}`, "true");
       clearPending();
-      toast(response.created ? "Indeed application recorded." : "Indeed application updated in Job Tracker.");
+      toast(response.created ? "Indeed application recorded." : "Indeed application updated in MyStratos.");
       log(response.created ? "Application created" : "Application updated", response.application);
     } catch (error) {
       warn("Confirmed Indeed application import failed", error?.message || String(error));

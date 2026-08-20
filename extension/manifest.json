@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Job Tracker",
+  "name": "MyStratos",
   "version": "0.13.2",
   "description": "Tracks confirmed job applications across LinkedIn and Indeed.",
   "permissions": ["storage", "identity", "scripting", "webNavigation", "notifications"],
@@ -8,6 +8,9 @@
     "https://www.linkedin.com/*",
     "https://*.indeed.com/*",
     "https://*.indeed.co.in/*",
+    "https://job-tracker-backend-n86w.onrender.com/*"
+  ],
+  "optional_host_permissions": [
     "http://127.0.0.1:8000/*",
     "http://localhost:8000/*"
   ],
@@ -28,6 +31,6 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Job Tracker"
+    "default_title": "MyStratos"
   }
 }

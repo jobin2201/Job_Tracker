@@ -30,7 +30,7 @@ from .schemas import (
 )
 
 
-app = FastAPI(title="Job Tracker API", version="0.2.0")
+app = FastAPI(title="MyStratos API", version="0.2.0")
 frontend_url = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173").rstrip("/")
 secure_frontend = frontend_url.startswith("https://")
 app.add_middleware(

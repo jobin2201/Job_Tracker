@@ -620,7 +620,7 @@
     const node = document.createElement("div");
     node.id = "job-tracker-toast";
     node.className = `job-tracker-toast ${kind}`;
-    node.innerHTML = `<strong>Job Tracker</strong><span>${message}</span>`;
+    node.innerHTML = `<strong>MyStratos</strong><span>${message}</span>`;
     document.body.appendChild(node);
     requestAnimationFrame(() => node.classList.add("visible"));
     toastTimer = setTimeout(() => node.remove(), 5000);
@@ -635,7 +635,7 @@
     log("Sending submitted LinkedIn application to FastAPI", job);
     if (!extensionAvailable()) {
       sendInProgress = false;
-      toast("Job Tracker was reloaded. Refresh this LinkedIn tab to reconnect.", "error");
+      toast("MyStratos was reloaded. Refresh this LinkedIn tab to reconnect.", "error");
       return;
     }
     try { chrome.runtime.sendMessage({ type: "IMPORT_LINKEDIN_JOB", payload: job }, (response) => {
@@ -650,11 +650,11 @@
         toast(response.created ? "Submitted application recorded." : "Application was already recorded.");
       } else {
         warn("FastAPI import failed", response?.error);
-        toast(response?.error || "Could not reach the local Job Tracker API.", "error");
+        toast(response?.error || "Could not reach the local MyStratos API.", "error");
       }
     }); } catch {
       sendInProgress = false;
-      toast("Job Tracker was reloaded. Refresh this LinkedIn tab to reconnect.", "error");
+      toast("MyStratos was reloaded. Refresh this LinkedIn tab to reconnect.", "error");
     }
   }
 
@@ -662,7 +662,7 @@
     if (!job || sendInProgress) return;
     if (recorded(job.external_job_id)) { clearExternalPending(job.external_job_id); return; }
     if (!extensionAvailable()) {
-      toast("Job Tracker was reloaded. Refresh this LinkedIn tab to reconnect.", "error");
+      toast("MyStratos was reloaded. Refresh this LinkedIn tab to reconnect.", "error");
       return;
     }
     sendInProgress = true;
@@ -679,25 +679,25 @@
         toast(response.created ? "External application recorded." : "External application was already recorded.");
       } else {
         warn("External application import failed", response?.error);
-        toast(response?.error || "Could not reach the local Job Tracker API.", "error");
+        toast(response?.error || "Could not reach the local MyStratos API.", "error");
       }
     }); } catch {
       sendInProgress = false;
-      toast("Job Tracker was reloaded. Refresh this LinkedIn tab to reconnect.", "error");
+      toast("MyStratos was reloaded. Refresh this LinkedIn tab to reconnect.", "error");
     }
   }
 
   function runtimeImport(job) {
     return new Promise((resolve, reject) => {
       if (!extensionAvailable()) {
-        reject(new Error("Job Tracker was reloaded. Refresh this LinkedIn tab to reconnect."));
+        reject(new Error("MyStratos was reloaded. Refresh this LinkedIn tab to reconnect."));
         return;
       }
       try {
         chrome.runtime.sendMessage({ type: "IMPORT_LINKEDIN_JOB", payload: job }, (response) => {
           if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
           else if (response?.ok) resolve(response);
-          else reject(new Error(response?.error || "Could not reach the local Job Tracker API."));
+          else reject(new Error(response?.error || "Could not reach the local MyStratos API."));
         });
       } catch (error) {
         reject(error);
@@ -728,7 +728,7 @@
     const guardKey = `${RECOVERY_GUARD_PREFIX}${job.external_job_id}`;
     if (sessionStorage.getItem(guardKey)) return false;
     sessionStorage.setItem(guardKey, String(Date.now()));
-    toast("Application confirmed. Job Tracker is reconnecting and will save it automatically…");
+    toast("Application confirmed. MyStratos is reconnecting and will save it automatically…");
     setTimeout(() => location.reload(), 700);
     return true;
   }
@@ -795,7 +795,7 @@
       if (method === "external") clearExternalPending(frozen.external_job_id);
       else clearPending();
       log(initialResponse.created ? "Application created" : "Application updated", initialResponse.application);
-      toast(initialResponse.created ? "Submitted application recorded." : "Application updated in Job Tracker.");
+      toast(initialResponse.created ? "Submitted application recorded." : "Application updated in MyStratos.");
 
       log("Enrichment started", frozen.external_job_id);
       try {

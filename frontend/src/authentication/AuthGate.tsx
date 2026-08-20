@@ -5,7 +5,7 @@ import "./authentication.css";
 
 export function AuthGate({ user }: { user: AuthUser | null | undefined }) {
   if (user === undefined) {
-    return <div className="auth-screen"><div className="auth-card"><Target size={34} /><h1>Job Tracker</h1><p>Loading your private workspace...</p></div></div>;
+    return <div className="auth-screen"><div className="auth-card"><Target size={34} /><h1>MyStratos</h1><p>Loading your private workspace...</p></div></div>;
   }
   if (user) return null;
   return (
@@ -13,7 +13,7 @@ export function AuthGate({ user }: { user: AuthUser | null | undefined }) {
       <div className="auth-card">
         <Target size={38} />
         <span className="eyebrow">YOUR PRIVATE JOB SEARCH</span>
-        <h1>Welcome to Job Tracker</h1>
+        <h1>Welcome to MyStratos</h1>
         <p>Sign in to keep your applications, contacts, timelines and reminders separate from every other user.</p>
         <a className="google-login" href={googleLoginUrl()}>Continue with Google</a>
       </div>
