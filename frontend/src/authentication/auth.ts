@@ -52,7 +52,6 @@ export async function signOut(): Promise<void> {
 }
 
 export function googleLoginUrl(): string {
-  return `${apiUrl("/auth/google")}?next=${encodeURIComponent(
-    window.location.origin
-  )}`;
+  const appUrl = `${window.location.origin}/app`;
+  return `${apiUrl("/auth/google")}?next=${encodeURIComponent(appUrl)}`;
 }

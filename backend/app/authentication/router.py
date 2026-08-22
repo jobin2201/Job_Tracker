@@ -45,7 +45,7 @@ def _safe_frontend_redirect(value: str) -> str:
     # The deployed frontend is controlled by FRONTEND_URL. Local origins stay
     # available for development without permitting an arbitrary OAuth redirect.
     if requested_origin == fallback_origin or requested_origin in local_origins:
-        return requested_origin
+        return value
     return fallback
 
 

@@ -660,5 +660,7 @@ async def linkedin_callback(request: Request, db: Session = Depends(get_db)):
     expires_at = token.get("expires_at")
     account.token_expires_at = datetime.fromtimestamp(expires_at, timezone.utc) if expires_at else None
     db.commit()
-    frontend_url = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
+    frontend_url = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173").rstrip("/")
+    if not frontend_url.endswith("/app"):
+        frontend_url = f"{frontend_url}/app"
     return RedirectResponse(f"{frontend_url}?linkedin=connected")

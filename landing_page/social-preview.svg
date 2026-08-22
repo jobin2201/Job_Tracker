@@ -1,0 +1,26 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#070B18"/>
+  <circle cx="187" cy="126" r="272" fill="#8B5CF6" opacity="0.32"/>
+  <circle cx="1015" cy="126" r="285" fill="#06B6D4" opacity="0.28"/>
+  <circle cx="733" cy="587" r="252" fill="#22C55E" opacity="0.18"/>
+  <rect x="78" y="68" width="1044" height="494" rx="52" fill="white" fill-opacity="0.08" stroke="white" stroke-opacity="0.16" stroke-width="2"/>
+  <rect x="112" y="101" width="70" height="70" rx="24" fill="url(#brand)"/>
+  <text x="147" y="145" text-anchor="middle" fill="white" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900">MS</text>
+  <text x="205" y="146" fill="white" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">MyStratos</text>
+  <text x="116" y="270" fill="white" font-family="Inter, Arial, sans-serif" font-size="78" font-weight="900" letter-spacing="-5">Your job search.</text>
+  <text x="116" y="356" fill="white" font-family="Inter, Arial, sans-serif" font-size="78" font-weight="900" letter-spacing="-5">Organized.</text>
+  <text x="120" y="428" fill="#B8C3DF" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="500">Track applications across LinkedIn + Indeed with follow-ups, contacts, timelines, and Sheets.</text>
+  <rect x="776" y="194" width="260" height="252" rx="32" fill="white" fill-opacity="0.11" stroke="white" stroke-opacity="0.18"/>
+  <rect x="808" y="232" width="196" height="22" rx="11" fill="#8B5CF6"/>
+  <rect x="808" y="283" width="150" height="18" rx="9" fill="white" fill-opacity="0.65"/>
+  <rect x="808" y="321" width="172" height="18" rx="9" fill="white" fill-opacity="0.42"/>
+  <rect x="808" y="360" width="118" height="18" rx="9" fill="white" fill-opacity="0.42"/>
+  <rect x="808" y="398" width="84" height="20" rx="10" fill="#22C55E"/>
+  <defs>
+    <linearGradient id="brand" x1="112" y1="101" x2="182" y2="171" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="0.52" stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+</svg>

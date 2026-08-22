@@ -1,16 +1,18 @@
 <div align="center">
 
-# 🎯 Job Tracker
+# 🎯 MyStratos
 
 ### Your job hunt, automatically tracked — across LinkedIn and Indeed.
 
-Job hunting means applying to dozens of roles across weeks, and losing track of half of them is the default outcome — which application needs a follow-up, which recruiter you already messaged, which "Apply" click actually went through. **Job Tracker** removes that guesswork. A lightweight Chrome extension watches your activity on supported job platforms in the background, detects the moment an application is actually submitted (not just clicked), and quietly syncs it to a personal dashboard — company, role, location, job description, recruiter contacts, and all — with zero manual data entry.
+Job hunting means applying to dozens of roles across weeks, and losing track of half of them is the default outcome — which application needs a follow-up, which recruiter you already messaged, which "Apply" click actually went through. **MyStratos** removes that guesswork. A lightweight Chrome extension watches your activity on supported job platforms in the background, detects the moment an application is actually submitted (not just clicked), and quietly syncs it to a personal dashboard — company, role, location, job description, recruiter contacts, and all — with zero manual data entry.
 
 [![Python](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Chrome Extension](https://img.shields.io/badge/Extension-Manifest%20V3-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://github.com/jobin2201/Job_Tracker/blob/main/LICENSE)
+
+🌐 **[Try MyStratos live](https://mystratos-abc-16d3.vercel.app)**
 
 </div>
 
@@ -114,7 +116,7 @@ A notification bell keeps a running count of things that need attention — over
 
 ## 🔐 Multi-User & Security
 
-Job Tracker isn't a single-user script — it's built so multiple people can use the same backend without ever seeing each other's data.
+MyStratos isn't a single-user script — it's built so multiple people can use the same backend without ever seeing each other's data.
 
 <div align="center">
 
@@ -245,26 +247,42 @@ Both terminals need to stay open while you use the app — the backend also runs
 ## 📁 Project Structure
 
 ```
-JobTRACKER/
+MyStratos/
 │── .gitignore
 │── README.md
 │── project_structure.txt
 │── LICENSE
 │
-├── backend/          ⚙️  FastAPI · PostgreSQL models · Alembic migrations
+├── backend/            ⚙️  FastAPI app
+│   ├── app/
+│   │   ├── authentication/         🔑  Google OAuth, sessions & security
+│   │   └── integrations/
+│   │       └── google_sheets/      📑  Per-user Sheets sync
+│   └── migrations/                 🐘  Alembic database migrations
 │
-├── extension/         🧩  Chrome Extension (Manifest V3) — detection & capture logic
+├── extension/           🧩  Chrome Extension (Manifest V3)
+│   ├── linkedin/
+│   ├── indeed/
+│   └── handshake/                  🔜  Coming soon
 │
-└── frontend/          📊  React · TypeScript · Vite dashboard
+├── frontend/            📊  React · TypeScript · Vite dashboard
+│   └── src/
+│       ├── authentication/
+│       └── integrations/google-sheets/
+│
+├── google_sheets_mirror/  📄  Optional standalone Sheets mirror utility
+│
+└── screenshots/
 ```
 
 <div align="center">
 
 | Folder | Purpose |
 |---|---|
-| `backend/` | FastAPI app, database models, auth & Alembic migrations |
-| `extension/` | Chrome extension — everything that watches job platforms and captures applications |
-| `frontend/` | The React + TypeScript + Vite dashboard you interact with |
+| `backend/` | FastAPI app, database models, Google OAuth authentication, Google Sheets integration & Alembic migrations |
+| `extension/` | Chrome extension — LinkedIn & Indeed detection today, with Handshake support on the way |
+| `frontend/` | The React + TypeScript + Vite dashboard, including authentication & Sheets integration UI |
+| `google_sheets_mirror/` | Optional standalone utility for mirroring data to Sheets outside the main sync worker |
 
 </div>
 
@@ -299,6 +317,6 @@ This project is licensed under the MIT License — see [LICENSE](https://github.
 
 <div align="center">
 
-⭐ **[View on GitHub](https://github.com/jobin2201/Job_Tracker)** ⭐
+⭐ **[View Live](https://mystratos-abc-16d3.vercel.app)** ⭐
 
 </div>

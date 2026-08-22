@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070b18" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      name="description"
+      content="MyStratos helps you track job applications, follow-ups, contacts, and interviews across LinkedIn and Indeed."
+    />
+    <meta property="og:title" content="MyStratos" />
+    <meta
+      property="og:description"
+      content="Your job search, organized beautifully across applications, follow-ups, contacts, and interviews."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./social-preview.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MyStratos" />
+    <meta
+      name="twitter:description"
+      content="Track applications across LinkedIn and Indeed with a beautiful follow-up workspace."
+    />
+    <meta name="twitter:image" content="./social-preview.svg" />
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <title>MyStratos — Your job search, organized</title>
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <div class="noise-layer" aria-hidden="true"></div>
+    <div class="page-glow glow-one" aria-hidden="true"></div>
+    <div class="page-glow glow-two" aria-hidden="true"></div>
+    <div class="page-glow glow-three" aria-hidden="true"></div>
+
+    <aside class="section-rail" aria-label="Page progress">
+      <a class="rail-dot active" href="#top" data-section-link="top"><span>Intro</span></a>
+      <a class="rail-dot" href="#capture" data-section-link="capture"><span>Capture</span></a>
+      <a class="rail-dot" href="#demo" data-section-link="demo"><span>Demo</span></a>
+      <a class="rail-dot" href="#install" data-section-link="install"><span>Install</span></a>
+      <a class="rail-dot" href="#launch" data-section-link="launch"><span>Try</span></a>
+    </aside>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="MyStratos home">
+        <span class="brand-icon">MS</span>
+        <span>MyStratos</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#capture">Capture</a>
+        <a href="#demo">Demo</a>
+        <a href="#install">Install</a>
+        <a href="#launch">Try now</a>
+      </nav>
+
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">
+        <span class="theme-track">
+          <span class="theme-icon sun">☀</span>
+          <span class="theme-icon moon">☾</span>
+          <span class="theme-knob"></span>
+        </span>
+      </button>
+
+      <button class="mobile-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </header>
+
+    <nav class="mobile-nav-panel" aria-label="Mobile navigation">
+      <a href="#capture">Capture</a>
+      <a href="#demo">Demo</a>
+      <a href="#install">Install</a>
+      <a href="#launch">Try now</a>
+    </nav>
+
+    <main id="top">
+      <section class="hero section observed-section" data-section="top">
+        <div class="hero-copy reveal">
+          <p class="eyebrow hero-eyebrow">LinkedIn + Indeed tracking, without the chaos</p>
+          <h1>Your job search, <span class="gradient-text">organized above the noise.</span></h1>
+          <p class="hero-text">
+            MyStratos captures applications, keeps follow-ups visible, saves hiring contacts,
+            and gives every opportunity a clean workspace so nothing gets lost.
+          </p>
+
+          <div class="hero-actions">
+            <a class="primary-cta magnetic" href="#install">Get the extension steps</a>
+            <a class="secondary-cta magnetic" href="https://mystratos-abc-16d3.vercel.app/" target="_blank" rel="noreferrer">
+              Open MyStratos app
+            </a>
+          </div>
+
+          <div class="trust-strip" aria-label="Supported workflows">
+            <span>Easy Apply</span>
+            <span>External Apply</span>
+            <span>Follow-ups</span>
+            <span>Google Sheets</span>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal parallax-zone" aria-label="Animated MyStratos application dashboard preview">
+          <div class="orbital-ring ring-one"></div>
+          <div class="orbital-ring ring-two"></div>
+          <div class="dashboard-card glass-card">
+            <div class="card-topline">
+              <span class="pulse-dot"></span>
+              <span>Live pipeline</span>
+            </div>
+            <div class="metric-row">
+              <div>
+                <strong data-demo-count="applications">12</strong>
+                <span>Applications</span>
+              </div>
+              <div>
+                <strong data-demo-count="contacts">6</strong>
+                <span>Contacts</span>
+              </div>
+              <div>
+                <strong data-demo-count="followups">3</strong>
+                <span>Follow-ups</span>
+              </div>
+            </div>
+            <div class="mini-list">
+              <article>
+                <span class="avatar" data-demo-avatar="0">OL</span>
+                <div>
+                  <strong data-demo-role="0">Product AI Specialist</strong>
+                  <small data-demo-meta="0">Orbit Labs · Follow-up planned</small>
+                </div>
+              </article>
+              <article>
+                <span class="avatar" data-demo-avatar="1">NA</span>
+                <div>
+                  <strong data-demo-role="1">Backend Platform Engineer</strong>
+                  <small data-demo-meta="1">Northstar AI · Contact saved</small>
+                </div>
+              </article>
+              <article>
+                <span class="avatar" data-demo-avatar="2">CN</span>
+                <div>
+                  <strong data-demo-role="2">Data Automation Analyst</strong>
+                  <small data-demo-meta="2">CloudNest · Timeline updated</small>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="chip-orbit chip-orbit-one">
+            <div class="floating-chip">Application captured</div>
+          </div>
+          <div class="chip-orbit chip-orbit-two">
+            <div class="floating-chip">Next follow-up: tomorrow</div>
+          </div>
+          <div class="chip-orbit chip-orbit-three">
+            <div class="floating-chip">Contact found</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section stats-strip reveal" aria-label="MyStratos highlights">
+        <article>
+          <strong>One workspace</strong>
+          <span>for every company you apply to</span>
+        </article>
+        <article>
+          <strong>Smart reminders</strong>
+          <span>so follow-ups stay visible</span>
+        </article>
+        <article>
+          <strong>Clean history</strong>
+          <span>for status changes and notes</span>
+        </article>
+      </section>
+
+      <section class="section split-showcase observed-section" id="capture" data-section="capture">
+        <div class="section-heading reveal">
+          <p class="eyebrow">What users understand immediately</p>
+          <h2>Apply anywhere. Keep the record in one clear place.</h2>
+          <p>
+            MyStratos is built for the normal job-search mess: LinkedIn Easy Apply,
+            LinkedIn external Apply, Indeed postings, recruiter contacts, manual edits,
+            follow-ups, and status changes.
+          </p>
+        </div>
+
+        <div class="showcase-layout">
+          <article class="side-panel reveal">
+            <span class="panel-number">01</span>
+            <h3>Capture</h3>
+            <p>When an application is confirmed, MyStratos saves the role, company, location, source, timeline, and next follow-up.</p>
+          </article>
+          <article class="side-panel reveal">
+            <span class="panel-number">02</span>
+            <h3>Plan</h3>
+            <p>Each application has its own workspace for notes, contacts, scheduled follow-ups, and status updates.</p>
+          </article>
+          <article class="side-panel reveal">
+            <span class="panel-number">03</span>
+            <h3>Review</h3>
+            <p>The dashboard and Google Sheets mirror help you see what is new, what needs attention, and what is ready for follow-up.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section features">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Built for real job search flow</p>
+          <h2>Everything important stays connected.</h2>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <span class="feature-icon">✦</span>
+            <h3>Automatic capture</h3>
+            <p>Track confirmed applications from LinkedIn and Indeed, including Easy Apply and external apply flows.</p>
+          </article>
+          <article class="feature-card reveal">
+            <span class="feature-icon">↗</span>
+            <h3>Follow-up planning</h3>
+            <p>Set your next action date, record what you did, and keep every opportunity from going silent.</p>
+          </article>
+          <article class="feature-card reveal">
+            <span class="feature-icon">◎</span>
+            <h3>Hiring contacts</h3>
+            <p>Store recruiter names, LinkedIn profiles, emails, phone numbers, and notes in the job workspace.</p>
+          </article>
+          <article class="feature-card reveal">
+            <span class="feature-icon">▣</span>
+            <h3>Google Sheets mirror</h3>
+            <p>Keep a beautiful spreadsheet copy for reviewing, sharing, and long-term tracking.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section flow observed-section" id="flow" data-section="capture">
+        <div class="section-heading reveal">
+          <p class="eyebrow">The moment you apply</p>
+          <h2>MyStratos turns scattered actions into a clear timeline.</h2>
+        </div>
+
+        <div class="flow-line">
+          <article class="flow-step reveal">
+            <span>01</span>
+            <h3>You apply</h3>
+            <p>LinkedIn or Indeed confirms the application action.</p>
+          </article>
+          <article class="flow-step reveal">
+            <span>02</span>
+            <h3>Details are captured</h3>
+            <p>Company, role, location, job description, source, and contacts are saved.</p>
+          </article>
+          <article class="flow-step reveal">
+            <span>03</span>
+            <h3>Your workspace updates</h3>
+            <p>The newest application appears on top with follow-up planning ready.</p>
+          </article>
+          <article class="flow-step reveal">
+            <span>04</span>
+            <h3>You stay on track</h3>
+            <p>Reminders, status history, and spreadsheet sync keep everything visible.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section demo-section observed-section" id="demo" data-section="demo">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Watch it in action</p>
+          <h2>Watch how MyStratos keeps your job search organized.</h2>
+          <p>
+            Press play to watch the walkthrough directly inside this card.
+          </p>
+        </div>
+
+        <div class="video-shell reveal">
+          <div class="video-frame" data-video-container>
+            <iframe
+              src="https://www.youtube.com/embed/VKzFdIUCu4M?si=5zxxD3_x0HRWme1A"
+              title="MyStratos � Live Job Application Tracking Demo"
+              width="100%"
+              height="100%"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <aside class="video-notes">
+            <article>
+              <strong>Capture</strong>
+              <span>See how confirmed applications become clean records.</span>
+            </article>
+            <article>
+              <strong>Plan</strong>
+              <span>Understand follow-ups, contacts, notes, and status history.</span>
+            </article>
+            <article>
+              <strong>Act</strong>
+              <span>Open the live app after installing the extension.</span>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section install-section observed-section" id="install" data-section="install">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Install and start tracking</p>
+          <h2>Set up the extension in a few simple steps.</h2>
+          <p>
+            This is written for a first-time user. They should understand what MyStratos does
+            before opening the live dashboard.
+          </p>
+        </div>
+
+        <div class="install-grid">
+          <article class="install-card reveal">
+            <span>1</span>
+            <h3>Download from GitHub</h3>
+            <p>
+              Go to the
+              <a class="inline-link" href="https://github.com/jobin2201/Job_Tracker" target="_blank" rel="noreferrer">
+                MyStratos GitHub page
+              </a>
+              and download or clone the extension folder.
+            </p>
+          </article>
+          <article class="install-card reveal">
+            <span>2</span>
+            <h3>Open Chrome Extensions</h3>
+            <p>Open <code>chrome://extensions</code>, enable Developer mode, and choose “Load unpacked”.</p>
+          </article>
+          <article class="install-card reveal">
+            <span>3</span>
+            <h3>Select the extension folder</h3>
+            <p>Pick the MyStratos <code>extension</code> folder. The extension icon appears in Chrome.</p>
+          </article>
+          <article class="install-card reveal">
+            <span>4</span>
+            <h3>Sign in and apply</h3>
+            <p>Sign in with Google, open LinkedIn or Indeed, and apply. Confirmed jobs appear in MyStratos.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section preview observed-section" id="launch" data-section="launch">
+        <div class="preview-panel reveal">
+          <div>
+            <p class="eyebrow">Ready after installation</p>
+            <h2>If you have installed the extension, try it out now.</h2>
+            <p>
+              Open the live MyStratos workspace, sign in with Google, and test a LinkedIn or
+              Indeed application flow from the same browser profile.
+            </p>
+            <a class="primary-cta magnetic" href="https://mystratos-abc-16d3.vercel.app/" target="_blank" rel="noreferrer">
+              Open MyStratos app
+            </a>
+          </div>
+          <div class="preview-stack" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>MyStratos</span>
+      <span>Your job search, organized.</span>
+    </footer>
+
+    <script src="./scripts/config.js"></script>
+    <script src="./scripts/theme.js"></script>
+    <script src="./scripts/demo-data.js"></script>
+    <script src="./scripts/scroll-effects.js"></script>
+    <script src="./scripts/video.js"></script>
+  </body>
+</html>
+
+

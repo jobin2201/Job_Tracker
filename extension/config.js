@@ -3,11 +3,11 @@ globalThis.JobTrackerConfig = (() => {
   const ENVIRONMENTS = {
     production: {
       apiUrl: "https://job-tracker-backend-n86w.onrender.com",
-      dashboardUrl: "https://mystratos-abc-16d3.vercel.app",
+      dashboardUrl: "https://mystratos-abc-16d3.vercel.app/app",
     },
     local: {
       apiUrl: "http://127.0.0.1:8000",
-      dashboardUrl: "http://127.0.0.1:5173",
+      dashboardUrl: "http://127.0.0.1:5173/app",
     },
   };
 

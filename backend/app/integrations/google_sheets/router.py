@@ -29,7 +29,9 @@ def _connection(db: Session, user_id: int) -> GoogleSheetConnection | None:
 
 
 def _frontend_url(query: str = "") -> str:
-    base = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
+    base = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173").rstrip("/")
+    if not base.endswith("/app"):
+        base = f"{base}/app"
     return f"{base}{query}"
 
 
